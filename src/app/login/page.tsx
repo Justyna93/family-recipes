@@ -2,10 +2,8 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -22,13 +20,12 @@ export default function LoginPage() {
       redirect: false,
     });
 
-    setLoading(false);
-
     if (res?.error) {
       setError("Invalid email or password");
+      setLoading(false);
     } else {
-      router.push("/");
-      router.refresh();
+      // Hard navigation ensures the session cookie is picked up on the first request
+      window.location.href = "/";
     }
   }
 
