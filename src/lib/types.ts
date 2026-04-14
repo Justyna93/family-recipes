@@ -25,3 +25,22 @@ export interface ExtractedRecipe {
   ingredients: string[];
   instructions: string[];
 }
+
+export type MealSlot = "breakfast" | "lunch" | "dinner";
+
+export interface MealPlanEntry {
+  id: string;
+  user_email: string;
+  recipe_slug: string;
+  date: string;
+  slot: MealSlot;
+  created_at: string | null;
+}
+
+export interface MealPlanEntryWithRecipe extends MealPlanEntry {
+  recipe: {
+    slug: string;
+    title: string;
+    image_url: string | null;
+  } | null;
+}

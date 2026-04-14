@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import InlineEdit from "./InlineEdit";
 import ImageUpload from "./ImageUpload";
+import AddToCalendarButton from "./AddToCalendarButton";
 
 interface RecipeDetailProps {
   slug: string;
@@ -81,6 +82,11 @@ export default function RecipeDetail({
           Source: {new URL(source_url).hostname}
         </a>
       )}
+
+      {/* Add to calendar */}
+      <div className="mt-4">
+        <AddToCalendarButton slug={slug} />
+      </div>
 
       {/* Meta row */}
       <div className="flex flex-wrap items-center gap-2 mt-4">

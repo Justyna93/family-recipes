@@ -17,6 +17,12 @@ export default function Nav() {
           {session && (
             <>
               <Link
+                href="/calendar"
+                className="text-sm font-medium text-stone-600 hover:text-amber-700 transition-colors"
+              >
+                Calendar
+              </Link>
+              <Link
                 href="/import"
                 className="bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
               >
