@@ -22,6 +22,7 @@ Rules:
 - "categories" should be 1-4 short descriptive tags inferred from the recipe content (e.g. "Italian", "Baked", "Quick", "Vegetarian", "Dessert", "Lunch", "Soup").
 - "ingredients" is an array with one item per ingredient line, as written in the recipe.
 - "instructions" is an array of ordered steps, as written in the recipe.
+- "prep_time" and "cook_time" must contain ONLY a duration in hours/minutes (e.g. "30 min", "1 h 15 min", "45 minutes"). If the value is not a pure time duration, set it to null.
 - If a field is not available, set it to null (or empty array for lists).
 - Unit conversions (apply everywhere — ingredients AND instructions):
   - Whenever a Fahrenheit temperature appears, add the Celsius equivalent in brackets immediately after: e.g. "350°F (175°C)".
