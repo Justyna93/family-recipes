@@ -22,6 +22,9 @@ Rules:
 - "ingredients" is an array with one item per ingredient line, as written in the recipe.
 - "instructions" is an array of ordered steps, as written in the recipe.
 - If a field is not available, set it to null (or empty array for lists).
+- Unit conversions (apply everywhere — ingredients AND instructions):
+  - Whenever a Fahrenheit temperature appears, add the Celsius equivalent in brackets immediately after: e.g. "350°F (175°C)".
+  - Whenever a non-metric length appears (inches, feet, yards), add the cm/m equivalent in brackets immediately after: e.g. '1 inch (2.5 cm)', '12 inches (30 cm)'.
 - Return ONLY the JSON. No markdown fences, no explanation.`;
 
 function stripHtml(html: string): string {
@@ -32,6 +35,21 @@ function stripHtml(html: string): string {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 50000);
+}
+
+/** Extract og:image or twitter:image from raw HTML before tag-stripping */
+function extractOgImage(html: string): string | null {
+  const patterns = [
+    /property=["']og:image["'][^>]*content=["']([^"']+)["']/i,
+    /content=["']([^"']+)["'][^>]*property=["']og:image["']/i,
+    /name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i,
+    /content=["']([^"']+)["'][^>]*name=["']twitter:image["']/i,
+  ];
+  for (const re of patterns) {
+    const m = html.match(re);
+    if (m?.[1]) return m[1];
+  }
+  return null;
 }
 
 function parseResponse(text: string): ExtractedRecipe {
@@ -48,11 +66,12 @@ export async function extractFromUrl(url: string): Promise<ExtractedRecipe> {
   });
   if (!res.ok) throw new Error(`Failed to fetch URL: ${res.status}`);
   const html = await res.text();
+  const ogImage = extractOgImage(html);
   const text = stripHtml(html);
 
   const client = getClient();
   const message = await client.messages.create({
-    model: "claude-sonnet-4-6-20250514",
+    model: "claude-haiku-4-5-20251001",
     max_tokens: 4096,
     system: SYSTEM_PROMPT,
     messages: [
@@ -65,7 +84,14 @@ export async function extractFromUrl(url: string): Promise<ExtractedRecipe> {
 
   const responseText =
     message.content[0].type === "text" ? message.content[0].text : "";
-  return parseResponse(responseText);
+  const extracted = parseResponse(responseText);
+
+  // Use og:image as fallback if Claude didn't extract one
+  if (!extracted.image_url && ogImage) {
+    extracted.image_url = ogImage;
+  }
+
+  return extracted;
 }
 
 export async function extractFromImage(
@@ -74,7 +100,7 @@ export async function extractFromImage(
 ): Promise<ExtractedRecipe> {
   const client = getClient();
   const message = await client.messages.create({
-    model: "claude-sonnet-4-6-20250514",
+    model: "claude-haiku-4-5-20251001",
     max_tokens: 4096,
     system: SYSTEM_PROMPT,
     messages: [
