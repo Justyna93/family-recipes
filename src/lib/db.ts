@@ -20,9 +20,7 @@ export async function getAllRecipes(): Promise<RecipeSummary[]> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("recipes")
-    .select(
-      "id, slug, title, source_url, image_url, categories, prep_time, cook_time, notes, created_at"
-    )
+    .select("*")
     .order("created_at", { ascending: false });
 
   if (error) throw error;
