@@ -34,8 +34,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="bg-stone-50 text-stone-900 antialiased min-h-screen">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Prevent flash of wrong theme */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var s=localStorage.getItem('theme');var d=window.matchMedia('(prefers-color-scheme:dark)').matches;if(s==='dark'||(s===null&&d)){document.documentElement.classList.add('dark')}})()` }} />
+      </head>
+      <body className="bg-stone-50 dark:bg-stone-900 text-stone-900 dark:text-stone-100 antialiased min-h-screen">
         <SessionProvider>
           <Nav />
           {children}

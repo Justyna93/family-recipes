@@ -14,7 +14,7 @@ export default function CategoryFilter({ categories, active, onSelect }: Categor
         className={`shrink-0 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
           active === null
             ? "bg-amber-600 text-white"
-            : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+            : "bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600"
         }`}
       >
         All
@@ -26,7 +26,7 @@ export default function CategoryFilter({ categories, active, onSelect }: Categor
           className={`shrink-0 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
             active === cat
               ? "bg-amber-600 text-white"
-              : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+              : "bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600"
           }`}
         >
           {cat}

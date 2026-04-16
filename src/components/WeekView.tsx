@@ -52,7 +52,7 @@ export default function WeekView({ days, anchorDate, entries }: WeekViewProps) {
       <div className="flex items-center justify-between">
         <button
           onClick={() => shiftWeek(-7)}
-          className="p-2 rounded-lg hover:bg-stone-100 text-stone-600"
+          className="p-2 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-400"
           aria-label="Previous week"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,14 +62,14 @@ export default function WeekView({ days, anchorDate, entries }: WeekViewProps) {
 
         <button
           onClick={() => router.push("/calendar")}
-          className="text-sm font-medium text-stone-600 hover:text-amber-700 px-3 py-1 rounded-lg"
+          className="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-amber-700 dark:hover:text-amber-400 px-3 py-1 rounded-lg"
         >
           Today
         </button>
 
         <button
           onClick={() => shiftWeek(7)}
-          className="p-2 rounded-lg hover:bg-stone-100 text-stone-600"
+          className="p-2 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-400"
           aria-label="Next week"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,25 +88,25 @@ export default function WeekView({ days, anchorDate, entries }: WeekViewProps) {
           return (
             <div
               key={dateStr}
-              className={`bg-white rounded-xl border ${
-                isToday ? "border-amber-400 ring-1 ring-amber-400" : "border-stone-200"
+              className={`bg-white dark:bg-stone-800 rounded-xl border ${
+                isToday ? "border-amber-400 ring-1 ring-amber-400" : "border-stone-200 dark:border-stone-700"
               } overflow-hidden`}
             >
               <div
                 className={`px-4 py-2 text-sm font-semibold ${
-                  isToday ? "bg-amber-50 text-amber-800" : "bg-stone-50 text-stone-700"
+                  isToday ? "bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300" : "bg-stone-50 dark:bg-stone-700/50 text-stone-700 dark:text-stone-300"
                 }`}
               >
                 {formatDayLabel(dayDate)}
                 {isToday && <span className="ml-2 text-xs font-normal">(today)</span>}
               </div>
 
-              <div className="divide-y divide-stone-100">
+              <div className="divide-y divide-stone-100 dark:divide-stone-700">
                 {MEAL_SLOTS.map((slot) => {
                   const slotEntries = entriesFor(dateStr, slot);
                   return (
                     <div key={slot} className="px-4 py-2 flex items-start gap-3">
-                      <span className="text-xs font-medium text-stone-400 uppercase tracking-wide w-16 pt-1 shrink-0">
+                      <span className="text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wide w-16 pt-1 shrink-0">
                         {SLOT_LABELS[slot]}
                       </span>
                       <div className="flex-1 space-y-1.5 min-w-0">
@@ -127,7 +127,7 @@ export default function WeekView({ days, anchorDate, entries }: WeekViewProps) {
                               )}
                               <Link
                                 href={`/recipes/${entry.recipe_slug}`}
-                                className="flex-1 text-sm text-stone-700 hover:text-amber-700 truncate"
+                                className="flex-1 text-sm text-stone-700 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 truncate"
                               >
                                 {entry.recipe?.title ?? entry.recipe_slug}
                               </Link>

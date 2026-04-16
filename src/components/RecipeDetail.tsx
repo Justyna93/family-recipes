@@ -38,7 +38,7 @@ export default function RecipeDetail({
       {/* Back link */}
       <Link
         href="/"
-        className="inline-flex items-center text-sm text-stone-500 hover:text-amber-600 mb-4 transition-colors"
+        className="inline-flex items-center text-sm text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 mb-4 transition-colors"
       >
         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -48,7 +48,7 @@ export default function RecipeDetail({
 
       {/* Hero image */}
       {imageUrl ? (
-        <div className="w-full aspect-video rounded-xl overflow-hidden bg-stone-100 mb-6">
+        <div className="w-full aspect-video rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800 mb-6">
           <img
             src={imageUrl}
             alt={title}
@@ -67,7 +67,7 @@ export default function RecipeDetail({
         field="title"
         value={title}
         as="h1"
-        className="text-2xl sm:text-3xl font-bold text-stone-800"
+        className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100"
         placeholder="Add a title..."
       />
 
@@ -93,7 +93,7 @@ export default function RecipeDetail({
         {categories.map((cat) => (
           <span
             key={cat}
-            className="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full font-medium"
+            className="text-xs bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-full font-medium"
           >
             {cat}
           </span>
@@ -112,7 +112,7 @@ export default function RecipeDetail({
 
       {/* Notes */}
       <div className="mt-6">
-        <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide mb-1">
+        <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">
           Notes
         </h2>
         <InlineEdit
@@ -120,25 +120,25 @@ export default function RecipeDetail({
           field="notes"
           value={notes ?? ""}
           as="p"
-          className="text-stone-600 text-sm leading-relaxed"
+          className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed"
           placeholder="Click to add notes..."
         />
       </div>
 
       {/* Ingredients */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-stone-800 mb-3">Ingredients</h2>
+        <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-3">Ingredients</h2>
         <div
-          className="prose prose-stone prose-sm max-w-none"
+          className="prose prose-stone dark:prose-invert prose-sm max-w-none"
           dangerouslySetInnerHTML={{ __html: ingredientsHtml }}
         />
       </div>
 
       {/* Instructions */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-stone-800 mb-3">Instructions</h2>
+        <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-3">Instructions</h2>
         <div
-          className="prose prose-stone prose-sm max-w-none"
+          className="prose prose-stone dark:prose-invert prose-sm max-w-none"
           dangerouslySetInnerHTML={{ __html: instructionsHtml }}
         />
       </div>

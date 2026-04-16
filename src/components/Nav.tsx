@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Nav() {
   const { data: session } = useSession();
 
   return (
-    <nav className="bg-white border-b border-stone-200 sticky top-0 z-50">
+    <nav className="bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700 sticky top-0 z-50">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/" className="text-lg font-bold text-stone-800 hover:text-amber-700 transition-colors">
+        <Link href="/" className="text-lg font-bold text-stone-800 dark:text-stone-100 hover:text-amber-700 dark:hover:text-amber-400 transition-colors">
           Family Recipes
         </Link>
 
@@ -18,7 +19,7 @@ export default function Nav() {
             <>
               <Link
                 href="/calendar"
-                className="text-sm font-medium text-stone-600 hover:text-amber-700 transition-colors"
+                className="text-sm font-medium text-stone-600 dark:text-stone-300 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
               >
                 Calendar
               </Link>
@@ -28,17 +29,18 @@ export default function Nav() {
               >
                 + Import
               </Link>
-              <span className="text-sm text-stone-500 hidden sm:inline">
+              <span className="text-sm text-stone-500 dark:text-stone-400 hidden sm:inline">
                 {session.user?.name}
               </span>
               <button
                 onClick={() => signOut()}
-                className="text-sm text-stone-400 hover:text-stone-600 transition-colors"
+                className="text-sm text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
               >
                 Sign out
               </button>
             </>
           )}
+          <ThemeToggle />
         </div>
       </div>
     </nav>

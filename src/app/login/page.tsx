@@ -30,19 +30,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-900 px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-stone-800">Family Recipes</h1>
-          <p className="text-stone-500 mt-2">Sign in to access your recipes</p>
+          <h1 className="text-3xl font-bold text-stone-800 dark:text-stone-100">Family Recipes</h1>
+          <p className="text-stone-500 dark:text-stone-400 mt-2">Sign in to access your recipes</p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 space-y-4"
+          className="bg-white dark:bg-stone-800 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-700 p-6 space-y-4"
         >
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Email
             </label>
             <input
@@ -51,12 +51,12 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Password
             </label>
             <input
@@ -65,12 +65,12 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              className="w-full rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 px-3 py-2 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
           </div>
 
           {error && (
-            <p className="text-red-600 text-sm">{error}</p>
+            <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
           )}
 
           <button
