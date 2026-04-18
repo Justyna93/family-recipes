@@ -59,8 +59,9 @@ function parseResponse(text: string): ExtractedRecipe {
   return JSON.parse(cleaned);
 }
 
-export async function extractFromUrl(url: string): Promise<ExtractedRecipe> {
-  const res = await fetch(url, {
+async function fetchPageText(url: string): Promise<{ text: string; ogImage: string | null }> {
+  // Try direct fetch first
+  const direct = await fetch(url, {
     headers: {
       "User-Agent":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -77,10 +78,23 @@ export async function extractFromUrl(url: string): Promise<ExtractedRecipe> {
       "Upgrade-Insecure-Requests": "1",
     },
   });
-  if (!res.ok) throw new Error(`Failed to fetch URL: ${res.status}`);
-  const html = await res.text();
-  const ogImage = extractOgImage(html);
-  const text = stripHtml(html);
+
+  if (direct.ok) {
+    const html = await direct.text();
+    return { text: stripHtml(html), ogImage: extractOgImage(html) };
+  }
+
+  // Fallback: use Jina Reader to bypass anti-bot protection
+  const jinaRes = await fetch(`https://r.jina.ai/${url}`, {
+    headers: { Accept: "text/plain" },
+  });
+  if (!jinaRes.ok) throw new Error(`Failed to fetch URL: ${direct.status}`);
+  const text = await jinaRes.text();
+  return { text, ogImage: null };
+}
+
+export async function extractFromUrl(url: string): Promise<ExtractedRecipe> {
+  const { text, ogImage } = await fetchPageText(url);
 
   const client = getClient();
   const message = await client.messages.create({
