@@ -19,7 +19,7 @@ const SYSTEM_PROMPT = `You are a recipe extraction assistant. Extract the recipe
 
 Rules:
 - Preserve the original language of the recipe exactly. Do NOT translate anything — if the recipe is in Polish, French, Spanish, or any other language, keep all text in that language.
-- "categories" should be 1-4 short descriptive tags inferred from the recipe content (e.g. "Italian", "Baked", "Quick", "Vegetarian", "Dessert", "Lunch", "Soup").
+- "categories" must only contain values from this exact list (use as many as apply, but ONLY from this list): Breakfast, Lunch, Keto, Paleo, GAPS, Baked, Salad, Sauce, Soup. Do not invent or use any other category values.
 - "ingredients" is an array with one item per ingredient line, as written in the recipe.
 - "instructions" is an array of ordered steps, as written in the recipe.
 - "prep_time" and "cook_time" must contain ONLY a duration in hours/minutes (e.g. "30 min", "1 h 15 min", "45 minutes"). If the value is not a pure time duration, set it to null.
