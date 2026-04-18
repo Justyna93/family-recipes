@@ -66,7 +66,7 @@ export default function WeekView({ days, anchorDate, entries }: WeekViewProps) {
           className="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-amber-700 dark:hover:text-amber-400 px-3 py-1 rounded-lg"
         >
           {(() => {
-            const [y0, m0, d0] = days[0].split("-").map(Number);
+            const [y0, _m0, d0] = days[0].split("-").map(Number);
             const [, m1, d1] = days[days.length - 1].split("-").map(Number);
             const fmt = (m: number, d: number) =>
               new Intl.DateTimeFormat("en", { month: "short" }).format(new Date(y0, m - 1, d));
