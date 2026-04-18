@@ -11,12 +11,19 @@ import type {
 export const RECIPES_TAG = "recipes";
 export const recipeTag = (slug: string) => `recipe:${slug}`;
 
-function getSupabase() {
+function getEnv() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
     throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
   }
+  return { url, key };
+}
+
+// Default client — used by mutations and fresh reads in route handlers.
+// cache: 'no-store' guarantees freshness but makes the caller dynamic.
+function getSupabase() {
+  const { url, key } = getEnv();
   return createClient(url, key, {
     global: {
       fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
@@ -24,9 +31,21 @@ function getSupabase() {
   });
 }
 
+// Cached client — for use inside unstable_cache. Uses Next's fetch cache
+// with the same tags so revalidateTag busts both cache layers. Does NOT
+// set no-store, so pages can be statically rendered / prerendered.
+function getSupabaseCached(tags: string[]) {
+  const { url, key } = getEnv();
+  return createClient(url, key, {
+    global: {
+      fetch: (input, init) => fetch(input, { ...init, next: { tags } }),
+    },
+  });
+}
+
 export const getAllRecipes = unstable_cache(
   async (): Promise<RecipeSummary[]> => {
-    const supabase = getSupabase();
+    const supabase = getSupabaseCached([RECIPES_TAG]);
     const { data, error } = await supabase
       .from("recipes")
       .select("*")
@@ -44,7 +63,7 @@ export async function getRecipeBySlug(
 ): Promise<Recipe | null> {
   const cached = unstable_cache(
     async (s: string): Promise<Recipe | null> => {
-      const supabase = getSupabase();
+      const supabase = getSupabaseCached([recipeTag(s), RECIPES_TAG]);
       const { data, error } = await supabase
         .from("recipes")
         .select("*")
