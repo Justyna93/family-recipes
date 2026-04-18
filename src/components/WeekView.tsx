@@ -113,7 +113,7 @@ export default function WeekView({ days, anchorDate, entries }: WeekViewProps) {
                   const slotEntries = entriesFor(dateStr, slot);
                   return (
                     <div key={slot} className="px-4 py-2 flex items-start gap-3">
-                      <span className="text-xs font-medium text-stone-400 dark:text-stone-500 uppercase tracking-wide w-16 pt-1 shrink-0">
+                      <span className="text-xs font-medium text-stone-400 dark:text-stone-500 w-16 pt-1 shrink-0">
                         {SLOT_LABELS[slot]}
                       </span>
                       <div className="flex-1 space-y-1.5 min-w-0">
