@@ -112,7 +112,7 @@ export default function RecipeDetail({
 
       {/* Notes */}
       <div className="mt-6">
-        <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">
+        <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 mb-1">
           Notes
         </h2>
         <InlineEdit
