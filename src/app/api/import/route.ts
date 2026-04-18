@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { auth } from "@/auth";
 import { extractFromUrl, extractFromImage, findUnsplashImage } from "@/lib/ai";
-import { createRecipe, slugExists } from "@/lib/db";
+import { createRecipe, slugExists, RECIPES_TAG } from "@/lib/db";
 import slugify from "slugify";
 
 function getMimeType(filename: string): "image/jpeg" | "image/png" | "image/webp" {
@@ -80,6 +81,10 @@ export async function POST(req: NextRequest) {
         .join("\n"),
       date_added: new Date().toISOString().split("T")[0],
     });
+
+    revalidateTag(RECIPES_TAG);
+    revalidatePath("/");
+    revalidatePath(`/recipes/${recipe.slug}`);
 
     return NextResponse.json({ slug: recipe.slug });
   } catch (err) {

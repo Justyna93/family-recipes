@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 import type {
   Recipe,
   RecipeSummary,
@@ -6,6 +7,9 @@ import type {
   MealPlanEntryWithRecipe,
   MealSlot,
 } from "./types";
+
+export const RECIPES_TAG = "recipes";
+export const recipeTag = (slug: string) => `recipe:${slug}`;
 
 function getSupabase() {
   const url = process.env.SUPABASE_URL;
@@ -20,30 +24,41 @@ function getSupabase() {
   });
 }
 
-export async function getAllRecipes(): Promise<RecipeSummary[]> {
-  const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("recipes")
-    .select("*")
-    .order("created_at", { ascending: false });
+export const getAllRecipes = unstable_cache(
+  async (): Promise<RecipeSummary[]> => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("recipes")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  if (error) throw error;
-  return (data ?? []) as RecipeSummary[];
-}
+    if (error) throw error;
+    return (data ?? []) as RecipeSummary[];
+  },
+  ["recipes-list"],
+  { tags: [RECIPES_TAG] }
+);
 
 export async function getRecipeBySlug(
   slug: string
 ): Promise<Recipe | null> {
-  const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("recipes")
-    .select("*")
-    .eq("slug", slug)
-    .single();
+  const cached = unstable_cache(
+    async (s: string): Promise<Recipe | null> => {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from("recipes")
+        .select("*")
+        .eq("slug", s)
+        .single();
 
-  if (error && error.code === "PGRST116") return null;
-  if (error) throw error;
-  return data as Recipe;
+      if (error && error.code === "PGRST116") return null;
+      if (error) throw error;
+      return data as Recipe;
+    },
+    ["recipe-by-slug", slug],
+    { tags: [recipeTag(slug), RECIPES_TAG] }
+  );
+  return cached(slug);
 }
 
 export async function createRecipe(
