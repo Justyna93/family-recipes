@@ -1,9 +1,16 @@
 import { notFound } from "next/navigation";
-import { getRecipeBySlug } from "@/lib/db";
+import { getAllRecipes, getRecipeBySlug } from "@/lib/db";
 import { markdownToHtml } from "@/lib/markdown";
 import RecipeDetail from "@/components/RecipeDetail";
 
-export const dynamic = "force-dynamic";
+export async function generateStaticParams() {
+  try {
+    const recipes = await getAllRecipes();
+    return recipes.map((r) => ({ slug: r.slug }));
+  } catch {
+    return [];
+  }
+}
 
 interface PageProps {
   params: { slug: string };

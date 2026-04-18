@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 import type {
   Recipe,
   RecipeSummary,
@@ -7,12 +8,22 @@ import type {
   MealSlot,
 } from "./types";
 
-function getSupabase() {
+export const RECIPES_TAG = "recipes";
+export const recipeTag = (slug: string) => `recipe:${slug}`;
+
+function getEnv() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
     throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
   }
+  return { url, key };
+}
+
+// Default client — used by mutations and fresh reads in route handlers.
+// cache: 'no-store' guarantees freshness but makes the caller dynamic.
+function getSupabase() {
+  const { url, key } = getEnv();
   return createClient(url, key, {
     global: {
       fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
@@ -20,30 +31,53 @@ function getSupabase() {
   });
 }
 
-export async function getAllRecipes(): Promise<RecipeSummary[]> {
-  const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("recipes")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return (data ?? []) as RecipeSummary[];
+// Cached client — for use inside unstable_cache. Uses Next's fetch cache
+// with the same tags so revalidateTag busts both cache layers. Does NOT
+// set no-store, so pages can be statically rendered / prerendered.
+function getSupabaseCached(tags: string[]) {
+  const { url, key } = getEnv();
+  return createClient(url, key, {
+    global: {
+      fetch: (input, init) => fetch(input, { ...init, next: { tags } }),
+    },
+  });
 }
+
+export const getAllRecipes = unstable_cache(
+  async (): Promise<RecipeSummary[]> => {
+    const supabase = getSupabaseCached([RECIPES_TAG]);
+    const { data, error } = await supabase
+      .from("recipes")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return (data ?? []) as RecipeSummary[];
+  },
+  ["recipes-list"],
+  { tags: [RECIPES_TAG] }
+);
 
 export async function getRecipeBySlug(
   slug: string
 ): Promise<Recipe | null> {
-  const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("recipes")
-    .select("*")
-    .eq("slug", slug)
-    .single();
+  const cached = unstable_cache(
+    async (s: string): Promise<Recipe | null> => {
+      const supabase = getSupabaseCached([recipeTag(s), RECIPES_TAG]);
+      const { data, error } = await supabase
+        .from("recipes")
+        .select("*")
+        .eq("slug", s)
+        .single();
 
-  if (error && error.code === "PGRST116") return null;
-  if (error) throw error;
-  return data as Recipe;
+      if (error && error.code === "PGRST116") return null;
+      if (error) throw error;
+      return data as Recipe;
+    },
+    ["recipe-by-slug", slug],
+    { tags: [recipeTag(slug), RECIPES_TAG] }
+  );
+  return cached(slug);
 }
 
 export async function createRecipe(

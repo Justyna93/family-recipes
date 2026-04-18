@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { auth } from "@/auth";
-import { updateRecipe } from "@/lib/db";
+import { updateRecipe, RECIPES_TAG, recipeTag } from "@/lib/db";
 import { createClient } from "@supabase/supabase-js";
+
+function revalidateRecipe(slug: string) {
+  revalidateTag(recipeTag(slug));
+  revalidateTag(RECIPES_TAG);
+  revalidatePath(`/recipes/${slug}`);
+  revalidatePath("/");
+}
 
 export async function PATCH(
   req: NextRequest,
@@ -24,6 +32,7 @@ export async function PATCH(
 
   try {
     await updateRecipe(params.slug, patch);
+    revalidateRecipe(params.slug);
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
@@ -66,6 +75,7 @@ export async function PUT(
       .getPublicUrl(path);
 
     await updateRecipe(params.slug, { image_url: data.publicUrl });
+    revalidateRecipe(params.slug);
 
     return NextResponse.json({ image_url: data.publicUrl });
   } catch {
