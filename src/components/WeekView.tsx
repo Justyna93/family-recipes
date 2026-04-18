@@ -62,9 +62,16 @@ export default function WeekView({ days, anchorDate, entries }: WeekViewProps) {
 
         <button
           onClick={() => router.push("/calendar")}
+          aria-label="Jump to current week"
           className="text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-amber-700 dark:hover:text-amber-400 px-3 py-1 rounded-lg"
         >
-          Today
+          {(() => {
+            const [y0, m0, d0] = days[0].split("-").map(Number);
+            const [, m1, d1] = days[days.length - 1].split("-").map(Number);
+            const fmt = (m: number, d: number) =>
+              new Intl.DateTimeFormat("en", { month: "short" }).format(new Date(y0, m - 1, d));
+            return `${d0} – ${d1} ${fmt(m1, d1)}`;
+          })()}
         </button>
 
         <button
