@@ -1,10 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import InlineEdit from "./InlineEdit";
 import ImageUpload from "./ImageUpload";
 import AddToCalendarButton from "./AddToCalendarButton";
+
+type WakeLockSentinelLike = {
+  released: boolean;
+  release: () => Promise<void>;
+  addEventListener: (type: "release", listener: () => void) => void;
+};
+
+function useScreenWakeLock() {
+  useEffect(() => {
+    const nav = navigator as Navigator & {
+      wakeLock?: { request: (type: "screen") => Promise<WakeLockSentinelLike> };
+    };
+    if (!nav.wakeLock) return;
+
+    let sentinel: WakeLockSentinelLike | null = null;
+    let cancelled = false;
+
+    const acquire = async () => {
+      try {
+        const s = await nav.wakeLock!.request("screen");
+        if (cancelled) {
+          s.release().catch(() => {});
+          return;
+        }
+        sentinel = s;
+      } catch {
+        // User gesture may be required, or the page may be hidden — ignore.
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible" && (!sentinel || sentinel.released)) {
+        acquire();
+      }
+    };
+
+    acquire();
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", handleVisibility);
+      if (sentinel && !sentinel.released) {
+        sentinel.release().catch(() => {});
+      }
+      sentinel = null;
+    };
+  }, []);
+}
 
 interface RecipeDetailProps {
   slug: string;
@@ -32,6 +81,8 @@ export default function RecipeDetail({
   instructionsHtml,
 }: RecipeDetailProps) {
   const [imageUrl, setImageUrl] = useState(image_url);
+
+  useScreenWakeLock();
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-6">
