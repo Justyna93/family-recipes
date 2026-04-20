@@ -25,8 +25,15 @@ Rules:
 - "prep_time" and "cook_time" must contain ONLY a duration in hours/minutes (e.g. "30 min", "1 h 15 min", "45 minutes"). If the value is not a pure time duration, set it to null.
 - If a field is not available, set it to null (or empty array for lists).
 - Unit conversions (apply everywhere — ingredients AND instructions):
-  - Whenever a Fahrenheit temperature appears, add the Celsius equivalent in brackets immediately after: e.g. "350°F (175°C)".
-  - Whenever a non-metric length appears (inches, feet, yards), add the cm/m equivalent in brackets immediately after: e.g. '1 inch (2.5 cm)', '12 inches (30 cm)'.
+  - Keep the ORIGINAL non-metric value exactly as written, and add the metric equivalent in brackets immediately after. Never replace the original — always original (metric).
+  - If a value is already in metric (g, kg, ml, l, cm, m, km, °C), leave it alone — do NOT add brackets.
+  - Round metric equivalents sensibly (typically to the nearest 1, 5, or 10) so the result is practical for cooking, not a long decimal.
+  - Temperature: Fahrenheit → Celsius. Formula: (°F − 32) × 5/9. Example: "350°F (175°C)", "400°F (200°C)".
+  - Length: inches (in, ") → cm (×2.54); feet (ft, ') → cm or m (×30.48 cm); yards (yd) → m (×0.91). Examples: '1 inch (2.5 cm)', '12 inches (30 cm)', '2 feet (60 cm)'.
+  - Weight: ounces (oz) → grams (×28.35); pounds (lb, lbs) → grams or kg (×453.6 g, or ×0.45 kg for large values); stones → kg (×6.35). Examples: '4 oz (115 g)', '1 lb (450 g)', '2 lbs (900 g)', '5 lbs (2.3 kg)'.
+  - Volume: teaspoons (tsp) → ml (×5); tablespoons (tbsp) → ml (×15); fluid ounces (fl oz) → ml (×30); cups → ml (×240, so 1 cup ≈ 240 ml, 1/2 cup ≈ 120 ml, 1/4 cup ≈ 60 ml); pints (pt) → ml (×475); quarts (qt) → ml or l (×950 ml, or ×0.95 l); gallons (gal) → l (×3.8). Examples: '1 tsp (5 ml)', '2 tbsp (30 ml)', '1 cup (240 ml)', '1/2 cup (120 ml)', '1 pint (475 ml)', '1 quart (950 ml)', '1 gallon (3.8 l)'.
+  - Keep fractions in the original unit as written (e.g. "1/2 cup", "3/4 lb") — the bracketed metric value is the rounded numeric equivalent.
+  - Apply conversions to EVERY occurrence, including repeated mentions inside the same instruction step.
 - Return ONLY the JSON. No markdown fences, no explanation.`;
 
 function stripHtml(html: string): string {
