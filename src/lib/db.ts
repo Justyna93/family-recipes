@@ -94,6 +94,12 @@ export async function createRecipe(
   return data as Recipe;
 }
 
+export async function deleteRecipe(slug: string): Promise<void> {
+  const supabase = getSupabase();
+  const { error } = await supabase.from("recipes").delete().eq("slug", slug);
+  if (error) throw error;
+}
+
 export async function updateRecipe(
   slug: string,
   patch: Partial<Pick<Recipe, "title" | "notes" | "image_url" | "categories">>
