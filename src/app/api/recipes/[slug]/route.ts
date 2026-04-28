@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { auth } from "@/auth";
-import { updateRecipe, RECIPES_TAG, recipeTag } from "@/lib/db";
+import { updateRecipe, deleteRecipe, RECIPES_TAG, recipeTag } from "@/lib/db";
 import { createClient } from "@supabase/supabase-js";
 
 function revalidateRecipe(slug: string) {
@@ -36,6 +36,24 @@ export async function PATCH(
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: { slug: string } }
+) {
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    await deleteRecipe(params.slug);
+    revalidateRecipe(params.slug);
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
   }
 }
 

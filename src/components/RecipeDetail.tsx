@@ -5,6 +5,7 @@ import Link from "next/link";
 import InlineEdit from "./InlineEdit";
 import ImageUpload from "./ImageUpload";
 import AddToCalendarButton from "./AddToCalendarButton";
+import DeleteRecipeButton from "./DeleteRecipeButton";
 
 type WakeLockSentinelLike = {
   released: boolean;
@@ -86,16 +87,19 @@ export default function RecipeDetail({
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-6">
-      {/* Back link */}
-      <Link
-        href="/"
-        className="inline-flex items-center text-sm text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 mb-4 transition-colors"
-      >
-        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-        All Recipes
-      </Link>
+      {/* Back link + delete */}
+      <div className="flex items-center justify-between mb-4">
+        <Link
+          href="/"
+          className="inline-flex items-center text-sm text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+        >
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          All Recipes
+        </Link>
+        <DeleteRecipeButton slug={slug} title={title} />
+      </div>
 
       {/* Hero image */}
       {imageUrl ? (
