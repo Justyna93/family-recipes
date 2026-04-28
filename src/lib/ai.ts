@@ -18,7 +18,7 @@ const SYSTEM_PROMPT = `You are a recipe extraction assistant. Extract the recipe
 }
 
 Rules:
-- Preserve the original language of the recipe exactly. Do NOT translate anything — if the recipe is in Polish, French, Spanish, or any other language, keep all text in that language.
+- Language handling: If the recipe is in Polish or English, preserve the original language exactly — do NOT translate. If the recipe is in ANY other language (French, Spanish, German, Italian, etc.), translate ALL text fields (title, categories descriptors, ingredients, instructions, prep_time, cook_time) into natural, fluent English. Apply translation to every string in the output.
 - "categories" must only contain values from this exact list (use as many as apply, but ONLY from this list): Breakfast, Lunch, Keto, Paleo, GAPS, Baked, Salad, Sauce, Soup. Do not invent or use any other category values.
 - "ingredients" is an array with one item per ingredient line, as written in the recipe.
 - "instructions" is an array of ordered steps, as written in the recipe.
