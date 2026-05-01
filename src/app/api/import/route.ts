@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { createClient } from "@supabase/supabase-js";
 import { auth } from "@/auth";
 import { extractFromUrl, extractFromImage, findUnsplashImage } from "@/lib/ai";
 import { createRecipe, slugExists, RECIPES_TAG } from "@/lib/db";
@@ -10,6 +11,57 @@ function getMimeType(filename: string): "image/jpeg" | "image/png" | "image/webp
   if (ext === "png") return "image/png";
   if (ext === "webp") return "image/webp";
   return "image/jpeg";
+}
+
+function extFromContentType(contentType: string | null): string {
+  if (!contentType) return "jpg";
+  if (contentType.includes("png")) return "png";
+  if (contentType.includes("webp")) return "webp";
+  if (contentType.includes("gif")) return "gif";
+  return "jpg";
+}
+
+// Re-host remote images so hotlink-protected origins (e.g. doradcasmaku.pl
+// via Cloudflare) still render. Source page is sent as Referer so the
+// origin allows the download.
+async function mirrorImageToStorage(
+  imageUrl: string,
+  sourceUrl: string | null,
+  slug: string
+): Promise<string | null> {
+  try {
+    const headers: Record<string, string> = {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+    };
+    if (sourceUrl) headers["Referer"] = sourceUrl;
+
+    const res = await fetch(imageUrl, { headers });
+    if (!res.ok) return null;
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType?.startsWith("image/")) return null;
+
+    const buffer = Buffer.from(await res.arrayBuffer());
+    const ext = extFromContentType(contentType);
+    const path = `recipes/${slug}.${ext}`;
+
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const upload = await supabase.storage
+      .from("recipe-images")
+      .upload(path, buffer, { contentType, upsert: true });
+    if (upload.error) return null;
+
+    return supabase.storage.from("recipe-images").getPublicUrl(path).data
+      .publicUrl;
+  } catch {
+    return null;
+  }
 }
 
 async function uniqueSlug(base: string): Promise<string> {
@@ -65,6 +117,13 @@ export async function POST(req: NextRequest) {
     }
 
     const slug = await uniqueSlug(extracted.title);
+
+    // Mirror remote images into Supabase storage so hotlink-protected
+    // hosts (Cloudflare Polish, Referer-checking origins) still render.
+    if (imageUrl && sourceUrl) {
+      const mirrored = await mirrorImageToStorage(imageUrl, sourceUrl, slug);
+      if (mirrored) imageUrl = mirrored;
+    }
 
     const recipe = await createRecipe({
       slug,
