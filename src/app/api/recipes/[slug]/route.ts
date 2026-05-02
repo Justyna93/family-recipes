@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { auth } from "@/auth";
 import { updateRecipe, deleteRecipe, RECIPES_TAG, recipeTag } from "@/lib/db";
+import { ALLOWED_CATEGORIES } from "@/lib/categories";
 import { createClient } from "@supabase/supabase-js";
 
 function revalidateRecipe(slug: string) {
@@ -21,10 +22,22 @@ export async function PATCH(
   }
 
   const body = await req.json();
-  const patch: { title?: string; notes?: string } = {};
+  const patch: { title?: string; notes?: string; categories?: string[] } = {};
 
   if (typeof body.title === "string") patch.title = body.title.trim();
   if (typeof body.notes === "string") patch.notes = body.notes.trim();
+  if (Array.isArray(body.categories)) {
+    const allowed = new Set<string>(ALLOWED_CATEGORIES);
+    const filtered: string[] = [];
+    const seen = new Set<string>();
+    for (const c of body.categories) {
+      if (typeof c === "string" && allowed.has(c) && !seen.has(c)) {
+        seen.add(c);
+        filtered.push(c);
+      }
+    }
+    patch.categories = filtered;
+  }
 
   if (Object.keys(patch).length === 0) {
     return NextResponse.json({ error: "No valid fields" }, { status: 400 });

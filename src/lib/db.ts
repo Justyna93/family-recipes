@@ -7,6 +7,7 @@ import type {
   MealPlanEntryWithRecipe,
   MealSlot,
 } from "./types";
+import { normalizeCategories } from "./categories";
 
 export const RECIPES_TAG = "recipes";
 export const recipeTag = (slug: string) => `recipe:${slug}`;
@@ -52,7 +53,10 @@ export const getAllRecipes = unstable_cache(
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return (data ?? []) as RecipeSummary[];
+    return (data ?? []).map((r) => ({
+      ...r,
+      categories: normalizeCategories(r.categories),
+    })) as RecipeSummary[];
   },
   ["recipes-list"],
   { tags: [RECIPES_TAG] }
@@ -72,7 +76,10 @@ export async function getRecipeBySlug(
 
       if (error && error.code === "PGRST116") return null;
       if (error) throw error;
-      return data as Recipe;
+      return {
+        ...data,
+        categories: normalizeCategories(data.categories),
+      } as Recipe;
     },
     ["recipe-by-slug", slug],
     { tags: [recipeTag(slug), RECIPES_TAG] }

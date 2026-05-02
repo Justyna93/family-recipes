@@ -6,6 +6,7 @@ import InlineEdit from "./InlineEdit";
 import ImageUpload from "./ImageUpload";
 import AddToCalendarButton from "./AddToCalendarButton";
 import DeleteRecipeButton from "./DeleteRecipeButton";
+import CategoryEditor from "./CategoryEditor";
 
 type WakeLockSentinelLike = {
   released: boolean;
@@ -145,14 +146,7 @@ export default function RecipeDetail({
 
       {/* Meta row */}
       <div className="flex flex-wrap items-center gap-2 mt-4">
-        {categories.map((cat) => (
-          <span
-            key={cat}
-            className="text-xs bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-full font-medium"
-          >
-            {cat}
-          </span>
-        ))}
+        <CategoryEditor slug={slug} initial={categories} />
         {prep_time && (
           <span className="text-sm text-stone-500">
             Prep: {prep_time}
