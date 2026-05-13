@@ -35,9 +35,9 @@ Rules:
     - "Schab pieczony" stays "Schab pieczony".
     - "200 g mąki" stays "200 g mąki" (NOT "200 g flour (200 g mąki)").
 - "categories" must only contain values from this exact list (use as many as apply, but ONLY from this list): Breakfast, Lunch, Keto, Paleo, GAPS, Baked, Salad, Sauce, Soup. Do not invent or use any other category values.
-- "ingredients" is an array with one item per ingredient line, as written in the recipe.
-- "instructions" is an array of ordered steps, as written in the recipe.
-- "prep_time" and "cook_time" must contain ONLY a duration in hours/minutes (e.g. "30 min", "1 h 15 min", "45 minutes"). If the value is not a pure time duration, set it to null.
+- "ingredients" is an array with one item per ingredient line, as written in the recipe. CAPTURE EVERY INGREDIENT MENTIONED ANYWHERE in the source — including ingredients listed at the top of the recipe AND any additional, optional, or variation ingredients mentioned later in the body, in bullet lists, or in "you can also add" / "variations" / "options" sections. Never skip the opening ingredient block. Never include only the trailing list. If the same ingredient block appears in two places, include each item once.
+- "instructions" is an array of ordered steps, as written in the recipe. PRESERVE THE FULL TEXT. If the instructions contain a bulleted or numbered sub-list (e.g. variations, options, sub-steps, "add one of the following"), include every bullet — either as part of the relevant step's text, or as its own array entry. Do not truncate, do not omit bullets, do not summarize. Keep the order from the source.
+- "prep_time" and "cook_time" must contain ONLY a duration in hours/minutes (e.g. "30 min", "1 h 15 min", "45 minutes"). If the source does not explicitly state a duration, set the field to null. NEVER copy text from ingredients, instructions, titles, or any other field into prep_time or cook_time. NEVER invent, estimate, or guess a duration. If unsure, set to null.
 - If a field is not available, set it to null (or empty array for lists).
 - Unit conversions (apply everywhere — ingredients AND instructions):
   - Keep the ORIGINAL non-metric value exactly as written, and add the metric equivalent in brackets immediately after. Never replace the original — always original (metric).
