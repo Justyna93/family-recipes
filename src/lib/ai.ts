@@ -36,6 +36,12 @@ Rules:
     - "200 g mąki" stays "200 g mąki" (NOT "200 g flour (200 g mąki)").
 - "categories" must only contain values from this exact list (use as many as apply, but ONLY from this list): Breakfast, Lunch, Keto, Paleo, GAPS, Baked, Salad, Sauce, Soup. Do not invent or use any other category values.
 - "ingredients" is an array with one item per ingredient line, as written in the recipe. CAPTURE EVERY INGREDIENT MENTIONED ANYWHERE in the source — including ingredients listed at the top of the recipe AND any additional, optional, or variation ingredients mentioned later in the body, in bullet lists, or in "you can also add" / "variations" / "options" sections. Never skip the opening ingredient block. Never include only the trailing list. If the same ingredient block appears in two places, include each item once.
+  - Read ingredient lines STRICTLY in source order, one line at a time. Do NOT merge two adjacent lines into one entry. Do NOT split a single ingredient line into two. Do NOT reorder lines. Do NOT swap quantities, units, or descriptors between adjacent lines (e.g. if line A is "2 cups flour" and line B is "1 tsp salt", never produce "2 cups salt" or "1 tsp flour"). Each output array entry corresponds to exactly one source line, in the same order it appears.
+  - If a line wraps visually across two display rows but is clearly one ingredient (e.g. a long descriptor continuing under the quantity), treat it as one entry. If two ingredients sit on the same physical row separated by a comma, bullet, or clear delimiter, treat them as two entries.
+- OCR / screenshot accuracy rules (apply to EVERY field — title, ingredients, instructions, categories, times):
+  - Every word you output must be a real word in the recipe's language (Polish or English), a legitimate proper noun (brand name, place name, person's name), or a standard cooking abbreviation/unit (g, kg, ml, l, tsp, tbsp, oz, lb, °C, °F, min, h, dag, dkg, etc.). NEVER output a nonsense or non-existent word.
+  - If a character or word is unclear, smudged, or ambiguous in the image, resolve it by choosing the most plausible REAL word that (a) fits the surrounding context, (b) makes sense in a recipe, and (c) matches the visible letters as closely as possible. For Polish, prefer correct diacritics (ą, ć, ę, ł, ń, ó, ś, ź, ż) over their plain-Latin lookalikes when the word is recognizably Polish.
+  - Before finalizing each field, silently re-read every word and confirm it is a real word. If any word is not real, replace it with the closest real word that fits the context. Never invent ingredients, steps, or details that are not visible in the image — if a word is unreadable AND has no plausible real-word match, omit only that word (do not fabricate around it).
 - "instructions" is an array of ordered top-level steps, as written in the recipe. PRESERVE THE FULL TEXT — never truncate, never omit, never summarize.
   - Each array entry MUST be one true top-level step. Sub-items (bulleted variations, options, sub-steps, "add one of the following" lists, etc.) are NOT separate steps and MUST NOT be their own array entries — they are part of their parent step.
   - To attach a sub-list to a step, embed it inside that step's string as markdown bullets. Each sub-item goes on its own line, prefixed with a newline + three spaces + "- " (so the bullets nest under the parent step's number when rendered). Example single array entry: "To make variations you can add one of the following when blending:\n   - 1 raw tomato\n   - 4-5 cooked prunes (unsweetened and without stones)\n   - raw garlic".
@@ -152,7 +158,7 @@ export async function extractFromImage(
 ): Promise<ExtractedRecipe> {
   const client = getClient();
   const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
+    model: "claude-sonnet-4-6",
     max_tokens: 4096,
     system: SYSTEM_PROMPT,
     messages: [
