@@ -184,3 +184,17 @@ export async function slugExists(slug: string): Promise<boolean> {
 
   return data !== null;
 }
+
+// Runs a minimal query against each table so the call registers as genuine
+// database activity. Supabase pauses free-tier projects that see only a
+// handful of user queries across a rolling 7-day window.
+export async function pingDatabase(): Promise<void> {
+  const supabase = getSupabase();
+  const [recipes, mealPlan] = await Promise.all([
+    supabase.from("recipes").select("id").limit(1),
+    supabase.from("meal_plan").select("id").limit(1),
+  ]);
+
+  if (recipes.error) throw recipes.error;
+  if (mealPlan.error) throw mealPlan.error;
+}

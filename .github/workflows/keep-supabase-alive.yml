@@ -2,24 +2,35 @@ name: Keep Supabase alive
 
 on:
   schedule:
-    # Every 3 days, well under Supabase's ~7-day free-tier pause window.
-    - cron: "0 6 */3 * *"
+    # Twice daily. Supabase wants "a few user requests to the database each
+    # day over the previous week" — a single ping every few days is under
+    # that bar. Two slots also absorb the delays and dropped runs GitHub
+    # warns about for scheduled workflows during periods of high load.
+    - cron: "17 6 * * *"
+    - cron: "17 18 * * *"
   workflow_dispatch: {}
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase REST API
+      - name: Query Supabase
         run: |
-          status=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${SUPABASE_URL}/rest/v1/recipes?select=id&limit=1" \
-            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}")
-          echo "Supabase responded with HTTP $status"
-          if [ "$status" -ge 300 ]; then
-            exit 1
-          fi
+          fail=0
+          for table in recipes meal_plan; do
+            for attempt in 1 2 3; do
+              status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+                "${SUPABASE_URL}/rest/v1/${table}?select=id&limit=1" \
+                -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+                -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}")
+              echo "${table} attempt ${attempt}: HTTP ${status}"
+              if [ "$status" -ge 300 ]; then
+                fail=1
+              fi
+              sleep 2
+            done
+          done
+          exit $fail
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
