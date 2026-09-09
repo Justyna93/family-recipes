@@ -2,7 +2,31 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { ExtractedRecipe } from "./types";
 
 function getClient() {
-  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "ANTHROPIC_API_KEY is not set. Add it to .env.local and restart the server."
+    );
+  }
+  return new Anthropic({ apiKey });
+}
+
+// The SDK's raw auth error ("authentication_error. API key is invalid.")
+// surfaces straight into the import form and says nothing about what to do,
+// so rewrite it. Everything else passes through unchanged.
+function withFriendlyErrors<T>(promise: Promise<T>): Promise<T> {
+  return promise.catch((err) => {
+    if (err instanceof Anthropic.AuthenticationError) {
+      throw new Error(
+        "Anthropic rejected the API key. Create a new key at console.anthropic.com, " +
+          "update ANTHROPIC_API_KEY in .env.local, and restart the server."
+      );
+    }
+    if (err instanceof Anthropic.RateLimitError) {
+      throw new Error("Anthropic rate limit reached — wait a moment and try again.");
+    }
+    throw err;
+  });
 }
 
 const SYSTEM_PROMPT = `You are a recipe extraction assistant. Extract the recipe and return ONLY a valid JSON object with this exact shape:
@@ -128,7 +152,7 @@ export async function extractFromUrl(url: string): Promise<ExtractedRecipe> {
   const { text, ogImage } = await fetchPageText(url);
 
   const client = getClient();
-  const message = await client.messages.create({
+  const message = await withFriendlyErrors(client.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 4096,
     system: SYSTEM_PROMPT,
@@ -138,7 +162,7 @@ export async function extractFromUrl(url: string): Promise<ExtractedRecipe> {
         content: `Extract the recipe from this web page content. The source URL is: ${url}\n\n${text}`,
       },
     ],
-  });
+  }));
 
   const responseText =
     message.content[0].type === "text" ? message.content[0].text : "";
@@ -157,7 +181,7 @@ export async function extractFromImage(
   mimeType: "image/jpeg" | "image/png" | "image/webp"
 ): Promise<ExtractedRecipe> {
   const client = getClient();
-  const message = await client.messages.create({
+  const message = await withFriendlyErrors(client.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 4096,
     system: SYSTEM_PROMPT,
@@ -176,7 +200,7 @@ export async function extractFromImage(
         ],
       },
     ],
-  });
+  }));
 
   const responseText =
     message.content[0].type === "text" ? message.content[0].text : "";
